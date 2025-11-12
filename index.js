@@ -78,6 +78,26 @@ app.post('/api/persons', (request, response) => {
   persons = persons.concat(person)
   response.json(person)
 })
+
+app.put('/api/persons/:id', (req, res) => {
+  const id = Number(req.params.id)
+  const { name, number } = req.body
+
+  if (!name || !number) {
+    return res.status(400).json({ error: 'name and number required' })
+  }
+
+  const idx = persons.findIndex(p => p.id === id)
+  if (idx === -1) return res.status(404).json({ error: 'person not found' })
+
+  const duplicate = persons.some(
+    p => p.id !== id && p.name.trim().toLowerCase() === name.trim().toLowerCase()
+  )
+  if (duplicate) return res.status(409).json({ error: 'el nombre no debe repetirse' })
+
+  persons[idx] = { id, name: name.trim(), number: number.trim() }
+  res.json(persons[idx])
+})
  
 const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
